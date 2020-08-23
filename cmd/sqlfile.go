@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -12,7 +13,10 @@ import (
 
 func main() {
 	db := newDB()
-	sqlfile.Exec(db, "./example.sql")
+	_, err := sqlfile.Exec(db, "./example.sql")
+	if err != nil {
+		fmt.Println("Exec / err: ", err.Error())
+	}
 }
 
 func newDB() *sql.DB {
