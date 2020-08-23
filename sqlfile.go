@@ -11,15 +11,19 @@ import (
 )
 
 // Exec execute SQL statements written int the specified sql file
-// Note that you cannot use comment out in the sql file
 func Exec(db *sql.DB, filepath string) error {
 	file, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return err
 	}
 	lines := strings.Split(string(file), "\n")
-	line := strings.Join(lines, "")
-	stmts := strings.Split(line, ";")
+	var validLines []string
+	for _, l := range lines {
+		cs := strings.Split(l, "--")
+		validLines = append(validLines, cs[0])
+	}
+	all := strings.Join(validLines, "")
+	stmts := strings.Split(all, ";")
 	stmts = stmts[:len(stmts)-1]
 
 	for _, stmt := range stmts {
