@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/joho/godotenv"
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/tanimutomo/sqlfile"
 )
@@ -20,8 +19,6 @@ func main() {
 }
 
 func newDB() *sql.DB {
-	godotenv.Load()
-
 	DBMS := os.Getenv("DB_TYPE")
 	USER := os.Getenv("DB_USERNAME")
 	PASS := os.Getenv("DB_PASSWORD")
