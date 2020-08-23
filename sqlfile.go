@@ -11,27 +11,38 @@ import (
 )
 
 // Exec execute SQL statements written int the specified sql file
-func Exec(db *sql.DB, filepath string) error {
-	file, err := ioutil.ReadFile(filepath)
+func Exec(
+	db *sql.DB,
+	filepath string,
+) (
+	res []sql.Result,
+	err error,
+) {
+	f, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		return err
+		return res, err
 	}
-	lines := strings.Split(string(file), "\n")
-	var validLines []string
-	for _, l := range lines {
-		cs := strings.Split(l, "--")
-		validLines = append(validLines, cs[0])
-	}
-	all := strings.Join(validLines, "")
-	stmts := strings.Split(all, ";")
-	stmts = stmts[:len(stmts)-1]
 
-	for _, stmt := range stmts {
-		_, err := db.Exec(stmt)
+	ls := strings.Split(string(f), "\n")
+
+	var vls []string
+	for _, l := range ls {
+		comsep := strings.Split(l, "--")
+		vls = append(vls, comsep[0])
+	}
+
+	l := strings.Join(vls, "")
+	qs := strings.Split(l, ";")
+	qs = qs[:len(qs)-1]
+
+	var rs []sql.Result
+	for _, q := range qs {
+		r, err := db.Exec(q)
 		if err != nil {
-			return fmt.Errorf(err.Error() + " : when executing > " + stmt)
+			return res, fmt.Errorf(err.Error() + " : when executing > " + q)
 		}
+		rs = append(rs, r)
 	}
 
-	return nil
+	return rs, nil
 }
