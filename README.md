@@ -9,6 +9,7 @@ go get github.com/tanimutomo/sqlfile
 
 ## Usage
 SQL) Prepare sql file.
+
 Don't forget add `;` at last of each query.
 ```sql
 -- example.sql
