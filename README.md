@@ -1,6 +1,4 @@
 # sqlfile
-**WIP**
-
 A Golang library for using SQL file.
 
 ## Installation
@@ -10,7 +8,7 @@ go get github.com/tanimutomo/sqlfile
 
 ## Usage
 Prepare sql file.
-```
+```sql
 -- example.sql
 INSERT INTO users ( -- users table
   id, name, email, created_at, updated_at
@@ -28,9 +26,13 @@ INSERT INTO articles ( -- articles table
 ```
 
 Execute sql file.
-```
+```go
 // Get a database handler
 db, err := sql.Open("mysql", "connection settings")
 
-res, err := sqlfile.Exec(db, "example.sql")
+// Load *.sql file
+s, err := sqlfile.Load("path/to/file")
+
+// Execute queries in the loaded file
+res, err := s.Exec(db)
 ```
