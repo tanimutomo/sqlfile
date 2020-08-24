@@ -1,5 +1,6 @@
 # sqlfile
-A Golang library for using SQL file.
+A Golang library for treating SQL file.
+sqlfile can execute multiple queries defined in .sql file with `database/sql`
 
 ## Installation
 ```
@@ -7,7 +8,8 @@ go get github.com/tanimutomo/sqlfile
 ```
 
 ## Usage
-Prepare sql file.
+SQL) Prepare sql file.
+Don't forget add `;` at last of each query.
 ```sql
 -- example.sql
 
@@ -20,13 +22,13 @@ INSERT INTO users ( -- users table
 INSERT INTO articles ( -- articles table
   id, user_id, title, content, created_at, updated_at
 ) VALUES (
-  1, 1, 'title1', 'content1', now(), now() -- post1
+  1, 1, 'title1', "-- About -- \n I'm sqlfile.", now(), now() -- post1
 ), (
-  2, 1, 'title2', 'content2', now(), now() -- post2
+  2, 1, 'title2', '- About - \n I''m sqlfile.', now(), now() -- post2
 );
 ```
 
-Execute sql file.
+Go) Load and Execute sql file.
 ```go
 import (
   "database/sql"
