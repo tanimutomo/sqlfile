@@ -10,6 +10,7 @@ go get github.com/tanimutomo/sqlfile
 Prepare sql file.
 ```sql
 -- example.sql
+
 INSERT INTO users ( -- users table
   id, name, email, created_at, updated_at
 ) VALUES (
@@ -27,11 +28,16 @@ INSERT INTO articles ( -- articles table
 
 Execute sql file.
 ```go
+import (
+  "database/sql"
+  "github.com/tanimutomo/sqlfile"
+)
+
 // Get a database handler
-db, err := sql.Open("mysql", "connection settings")
+db, err := sql.Open("DBMS", "CONNECTION")
 
 // Load *.sql file
-s, err := sqlfile.Load("path/to/file")
+s, err := sqlfile.Load("example.sql")
 
 // Execute queries in the loaded file
 res, err := s.Exec(db)
