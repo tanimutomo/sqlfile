@@ -10,17 +10,31 @@ import (
 	"strings"
 )
 
+// SqlFile represents a queries holder
+type SqlFile struct {
+	queries []string
+}
+
 // Exec execute SQL statements written int the specified sql file
-func Exec(
-	db *sql.DB,
-	filepath string,
-) (
-	res []sql.Result,
-	err error,
-) {
-	f, err := ioutil.ReadFile(filepath)
+func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
+	var rs []sql.Result
+
+	for _, q := range s.queries {
+		r, err := db.Exec(q)
+		if err != nil {
+			return res, fmt.Errorf(err.Error() + " : when executing > " + q)
+		}
+		rs = append(rs, r)
+	}
+
+	return rs, nil
+}
+
+// Load load sql file from path, and return SqlFile pointer
+func Load(path string) (*SqlFile, error) {
+	f, err := ioutil.ReadFile((path))
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
 	ls := strings.Split(string(f), "\n")
@@ -35,17 +49,10 @@ func Exec(
 	qs := strings.Split(l, ";")
 	qs = qs[:len(qs)-1]
 
-	var rs []sql.Result
-	for i, q := range qs {
-		fmt.Println(i, q)
-		r, err := db.Exec(q)
-		if err != nil {
-			return res, fmt.Errorf(err.Error() + " : when executing > " + q)
-		}
-		rs = append(rs, r)
+	sqlfile := &SqlFile{
+		queries: qs,
 	}
-
-	return rs, nil
+	return sqlfile, nil
 }
 
 func excludeComment(line string) string {

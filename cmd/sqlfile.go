@@ -12,7 +12,11 @@ import (
 
 func main() {
 	db := newDB()
-	_, err := sqlfile.Exec(db, "./example.sql")
+	s, err := sqlfile.Load("./example.sql")
+	if err != nil {
+		fmt.Println("Load / err: ", err.Error())
+	}
+	_, err = s.Exec(db)
 	if err != nil {
 		fmt.Println("Exec / err: ", err.Error())
 	}
