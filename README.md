@@ -1,5 +1,6 @@
 # sqlfile
 A Golang library for treating SQL file.
+
 sqlfile can execute multiple queries defined in .sql file with `database/sql`
 
 ## Installation
