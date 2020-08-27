@@ -13,12 +13,30 @@ import (
 func main() {
 	db := newDB()
 	s, err := sqlfile.Load("./example.sql")
+	fmt.Println("Load / s: ", s)
+	fmt.Println("Load / err: ", err)
 	if err != nil {
-		fmt.Println("Load / err: ", err.Error())
+		return
 	}
-	_, err = s.Exec(db)
-	if err != nil {
-		fmt.Println("Exec / err: ", err.Error())
+
+	res, err := s.Exec(db)
+	fmt.Println("Exec / err: ", err)
+	for i, r := range res {
+		fmt.Printf("Query: %d\n", i)
+
+		id, err := r.LastInsertId()
+		if err != nil {
+			fmt.Printf("when calling LastInseredId(): %s", err)
+			return
+		}
+		fmt.Println("Exec / res.LastIntertedId: ", id)
+
+		num, err := r.RowsAffected()
+		if err != nil {
+			fmt.Printf("when calling RowsAffected(): %s", err)
+			return
+		}
+		fmt.Println("Exec / res.RowsAffected: ", num)
 	}
 }
 
