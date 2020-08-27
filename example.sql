@@ -29,5 +29,5 @@ INSERT INTO articles ( -- articles table
 ) VALUES (
   1, 1, 'title1', "-- About -- \n I'm sqlfile.", now(), now() -- post1
 ), (
-  2, 1, 'title2', '- About - I''m sqlfile.', now(), now() -- post2
+  2, 1, 'title2', '- About - \n I''m sqlfile.', now(), now() -- post2
 );
