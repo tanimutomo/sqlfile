@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -51,5 +52,45 @@ func TestExec_Commit(t *testing.T) {
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestLoad_SqlNotIncludeComments(t *testing.T) {
+	t.Helper()
+
+	exps, err := readFileByLine("./testdata/expected.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	s, err := Load("./testdata/not_include_comments.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, len(exps), len(s.queries))
+
+	for i := 0; i < len(exps); i++ {
+		assert.Equal(t, exps[i], s.queries[i])
+	}
+}
+
+func TestLoad_SqlIncludeComments(t *testing.T) {
+	t.Helper()
+
+	exps, err := readFileByLine("./testdata/expected.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	s, err := Load("./testdata/include_comments.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, len(exps), len(s.queries))
+
+	for i := 0; i < len(exps); i++ {
+		assert.Equal(t, exps[i], s.queries[i])
 	}
 }
