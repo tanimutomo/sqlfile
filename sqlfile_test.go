@@ -2,38 +2,95 @@ package sqlfile
 
 import (
 	"database/sql"
-	"os"
+	"regexp"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
 	db *sql.DB
 )
 
-func TestMain(m *testing.M) {
-	db = newDB()
+func newMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	return db, mock
 }
 
-func newDB() *sql.DB {
-	DBMS := os.Getenv("DB_TYPE")
-	USER := os.Getenv("DB_USERNAME")
-	PASS := os.Getenv("DB_PASSWORD")
-	DBNAME := os.Getenv("DB_NAME")
-	DBHOST := os.Getenv("DB_HOST")
-	DBPORT := os.Getenv("DB_PORT")
-	CONNECT := USER + ":" + PASS + "@(" + DBHOST + ":" + DBPORT + ")/" + DBNAME + "?charset=utf8mb4&parseTime=true"
+func TestExec_Commit(t *testing.T) {
+	t.Helper()
+	db, mock := newMockDB(t)
+	defer db.Close()
 
-	db, err := sql.Open(DBMS, CONNECT)
-	if err != nil {
-		panic(err)
+	tests := []struct {
+		query  string
+		lastID int64
+		rows   int64
+	}{
+		{`DROP TABLE IF EXISTS users`, 0, 0},
+		{`CREATE TABLE users (id BIGINT PRIMARY KEY AUTO_INCREMENT NOTNULL, name VARCHAR(255))`, 0, 0},
+		{`INSERT INTO users (id, name) VALUES (1, 'user')`, 1, 1},
 	}
 
-	return db
+	var qs []string
+	for _, test := range tests {
+		mock.ExpectExec(regexp.QuoteMeta(test.query)).
+			WillReturnResult(sqlmock.NewResult(test.lastID, test.rows))
+		qs = append(qs, test.query)
+	}
+
+	s := SqlFile{queries: qs}
+
+	if _, err := s.Exec(db); err != nil {
+		t.Errorf("test error: %s", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
 }
 
-func TestExec(t *testing.T) {
+func TestLoad_SqlNotIncludeComments(t *testing.T) {
 	t.Helper()
-	Exec(db, "./example.sql")
+
+	exps, err := readFileByLine("./testdata/expected.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	s, err := Load("./testdata/not_include_comments.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, len(exps), len(s.queries))
+
+	for i := 0; i < len(exps); i++ {
+		assert.Equal(t, exps[i], s.queries[i])
+	}
+}
+
+func TestLoad_SqlIncludeComments(t *testing.T) {
+	t.Helper()
+
+	exps, err := readFileByLine("./testdata/expected.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	s, err := Load("./testdata/include_comments.sql")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, len(exps), len(s.queries))
+
+	for i := 0; i < len(exps); i++ {
+		assert.Equal(t, exps[i], s.queries[i])
+	}
 }
