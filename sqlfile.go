@@ -32,12 +32,10 @@ func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
 
 // Load load sql file from path, and return SqlFile pointer
 func Load(path string) (*SqlFile, error) {
-	f, err := ioutil.ReadFile((path))
+	ls, err := readFileByLine(path)
 	if err != nil {
 		return nil, err
 	}
-
-	ls := strings.Split(string(f), "\n")
 
 	var ncls []string
 	for _, l := range ls {
@@ -53,6 +51,16 @@ func Load(path string) (*SqlFile, error) {
 		queries: qs,
 	}
 	return sqlfile, nil
+}
+
+func readFileByLine(path string) (ls []string, err error) {
+	f, err := ioutil.ReadFile((path))
+	if err != nil {
+		return ls, err
+	}
+
+	ls = strings.Split(string(f), "\n")
+	return ls, nil
 }
 
 func excludeComment(line string) string {
