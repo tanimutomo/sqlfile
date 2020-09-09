@@ -1,4 +1,8 @@
 # sqlfile
+
+![CI/CD](https://github.com/tanimutomo/sqlfile/workflows/gotest/badge.svg)
+[![codecov](https://codecov.io/gh/tanimutomo/sqlfile/branch/master/graph/badge.svg)](https://codecov.io/gh/tanimutomo/sqlfile)
+
 A Golang library for treating SQL file.
 
 sqlfile can execute multiple queries defined in .sql file with `database/sql`
