@@ -17,16 +17,22 @@ type SqlFile struct {
 
 // Exec execute SQL statements written int the specified sql file
 func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
-	var rs []sql.Result
+	tx, err := db.Begin()
+	if err != nil {
+		return res, err
+	}
+	defer rescue(tx, &err)
 
+	var rs []sql.Result
 	for _, q := range s.queries {
-		r, err := db.Exec(q)
+		r, err := tx.Exec(q)
 		if err != nil {
 			return res, fmt.Errorf(err.Error() + " : when executing > " + q)
 		}
 		rs = append(rs, r)
 	}
 
+	tx.Commit()
 	return rs, nil
 }
 
@@ -109,5 +115,11 @@ func excludeComment(line string) string {
 
 		nc += ck[:ei+1]
 		ck = ck[ei+1:]
+	}
+}
+
+func rescue(tx *sql.Tx, err *error) {
+	if recover() != nil || err != nil {
+		tx.Rollback()
 	}
 }

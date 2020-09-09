@@ -37,12 +37,16 @@ func TestExec_Commit(t *testing.T) {
 		{`INSERT INTO users (id, name) VALUES (1, 'user')`, 1, 1},
 	}
 
+	mock.ExpectBegin()
+
 	var qs []string
 	for _, test := range tests {
 		mock.ExpectExec(regexp.QuoteMeta(test.query)).
 			WillReturnResult(sqlmock.NewResult(test.lastID, test.rows))
 		qs = append(qs, test.query)
 	}
+
+	mock.ExpectCommit()
 
 	s := SqlFile{queries: qs}
 
