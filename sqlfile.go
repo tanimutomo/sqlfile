@@ -21,7 +21,7 @@ func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
 	if err != nil {
 		return res, err
 	}
-	defer rescue(tx, &err)
+	defer saveTx(tx, &err)
 
 	var rs []sql.Result
 	for _, q := range s.queries {
@@ -32,8 +32,7 @@ func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
 		rs = append(rs, r)
 	}
 
-	tx.Commit()
-	return rs, nil
+	return rs, err
 }
 
 // Load load sql file from path, and return SqlFile pointer
@@ -118,8 +117,14 @@ func excludeComment(line string) string {
 	}
 }
 
-func rescue(tx *sql.Tx, err *error) {
-	if recover() != nil || err != nil {
+func saveTx(tx *sql.Tx, err *error) {
+	if p := recover(); p != nil {
 		tx.Rollback()
+		panic(p)
+	} else if *err != nil {
+		tx.Rollback()
+	} else {
+		e := tx.Commit()
+		err = &e
 	}
 }
