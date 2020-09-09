@@ -2,6 +2,7 @@
 
 ![CI/CD](https://github.com/tanimutomo/sqlfile/workflows/gotest/badge.svg)
 [![codecov](https://codecov.io/gh/tanimutomo/sqlfile/branch/master/graph/badge.svg)](https://codecov.io/gh/tanimutomo/sqlfile)
+[![goreport](https://goreportcard.com/badge/github.com/tanimutomo/sqlfile)](https://goreportcard.com/report/github.com/tanimutomo/sqlfile)
 
 A Golang library for treating SQL file.
 
