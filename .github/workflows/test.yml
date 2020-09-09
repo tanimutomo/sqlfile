@@ -1,7 +1,13 @@
 name: test
-on: [pull_request]
-jobs:
 
+on: push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
   test:
     name: gotest
     runs-on: ubuntu-latest
@@ -19,3 +25,11 @@ jobs:
 
     - name: Test code
       run: go test -v -cover .
+
+    - name: upload coverage to codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.SQLFILE_CODECOV_TOKEN }}
+        name: coverage
+        flags: unittests
+        fail_ci_if_error: true
