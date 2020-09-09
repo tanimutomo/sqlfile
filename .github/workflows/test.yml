@@ -25,9 +25,9 @@ jobs:
       run: go get -v -t -d ./...
 
     - name: Test code
-      run: go test -v -cover .
+      run: go test -v -cover -coverprofile=coverage.out -p 1 ./...
 
-    - name: upload coverage to codecov
+    - name: Upload coverage to CodeCov
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.SQLFILE_CODECOV_TOKEN }}
