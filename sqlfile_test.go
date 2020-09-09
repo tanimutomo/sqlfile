@@ -2,6 +2,7 @@ package sqlfile
 
 import (
 	"database/sql"
+	"errors"
 	"regexp"
 	"testing"
 
@@ -37,6 +38,8 @@ func TestExec_Commit(t *testing.T) {
 		{`INSERT INTO users (id, name) VALUES (1, 'user')`, 1, 1},
 	}
 
+	mock.ExpectBegin()
+
 	var qs []string
 	for _, test := range tests {
 		mock.ExpectExec(regexp.QuoteMeta(test.query)).
@@ -44,11 +47,35 @@ func TestExec_Commit(t *testing.T) {
 		qs = append(qs, test.query)
 	}
 
+	mock.ExpectCommit()
+
 	s := SqlFile{queries: qs}
 
 	if _, err := s.Exec(db); err != nil {
 		t.Errorf("test error: %s", err)
 	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestExec_Rollback(t *testing.T) {
+	t.Helper()
+	db, mock := newMockDB(t)
+	defer db.Close()
+
+	query := `INSERT INTO non_existing_table (id) values (1)`
+	qs := []string{query}
+
+	mock.ExpectBegin()
+	mock.ExpectExec(regexp.QuoteMeta(query)).
+		WillReturnError(errors.New("Error 1146: Table 'tmp.non_existing_table' doesn't exist"))
+	mock.ExpectRollback()
+
+	s := SqlFile{queries: qs}
+
+	s.Exec(db)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %s", err)

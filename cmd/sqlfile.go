@@ -12,14 +12,22 @@ import (
 
 func main() {
 	db := newDB()
-	s, err := sqlfile.Load("./example.sql")
+
+	s, err := sqlfile.Load("./examples/create_tables.sql")
+	res, err := s.Exec(db)
+	if err != nil {
+		return
+	}
+	fmt.Println("Tables are created.")
+
+	s, err = sqlfile.Load("./examples/insert.sql")
 	fmt.Println("Load / s: ", s)
 	fmt.Println("Load / err: ", err)
 	if err != nil {
 		return
 	}
 
-	res, err := s.Exec(db)
+	res, err = s.Exec(db)
 	fmt.Println("Exec / err: ", err)
 	for i, r := range res {
 		fmt.Printf("Query: %d\n", i)
