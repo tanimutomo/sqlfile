@@ -45,9 +45,19 @@ import (
 // Get a database handler
 db, err := sql.Open("DBMS", "CONNECTION")
 
-// Load *.sql file
-s, err := sqlfile.Load("example.sql")
+// Initialize SqlFile
+s := sqlfile.New()
 
-// Execute queries in the loaded file
+// Load input file and store queries written in the file
+err := s.File("example.sql")
+
+// Load input files and store queries written in the files
+err := s.Files("example.sql", "example2.sql")
+
+// Load files in the input directory and store queries written in the files
+err := s.Directory("./examples")
+
+// Execute the stored queries
+// transaction is used to execute queries in Exec()
 res, err := s.Exec(db)
 ```
