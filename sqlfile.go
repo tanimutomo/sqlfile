@@ -12,7 +12,61 @@ import (
 
 // SqlFile represents a queries holder
 type SqlFile struct {
+	files   []string
 	queries []string
+}
+
+// New create new SqlFile object
+func New() *SqlFile {
+	return &SqlFile{}
+}
+
+// File add and load queries from input file
+func (s *SqlFile) File(file string) error {
+	queries, err := load(file)
+	if err != nil {
+		return err
+	}
+
+	s.files = append(s.files, file)
+	s.queries = append(s.queries, queries...)
+
+	return nil
+}
+
+// Files add and load queries from multiple input files
+func (s *SqlFile) Files(files ...string) error {
+	for _, file := range files {
+		if err := s.File(file); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Directory add and load queries from *.sql files in specified directory
+func (s *SqlFile) Directory(dir string) error {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+
+		name := file.Name()
+		if name[len(name)-3:] != "sql" {
+			continue
+		}
+
+		if err := s.File(dir + "/" + name); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Exec execute SQL statements written int the specified sql file
@@ -36,10 +90,10 @@ func (s *SqlFile) Exec(db *sql.DB) (res []sql.Result, err error) {
 }
 
 // Load load sql file from path, and return SqlFile pointer
-func Load(path string) (*SqlFile, error) {
+func load(path string) (qs []string, err error) {
 	ls, err := readFileByLine(path)
 	if err != nil {
-		return nil, err
+		return qs, err
 	}
 
 	var ncls []string
@@ -49,17 +103,14 @@ func Load(path string) (*SqlFile, error) {
 	}
 
 	l := strings.Join(ncls, "")
-	qs := strings.Split(l, ";")
+	qs = strings.Split(l, ";")
 	qs = qs[:len(qs)-1]
 
-	sqlfile := &SqlFile{
-		queries: qs,
-	}
-	return sqlfile, nil
+	return qs, nil
 }
 
 func readFileByLine(path string) (ls []string, err error) {
-	f, err := ioutil.ReadFile((path))
+	f, err := ioutil.ReadFile(path)
 	if err != nil {
 		return ls, err
 	}
