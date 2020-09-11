@@ -13,19 +13,20 @@ import (
 func main() {
 	db := newDB()
 
-	s, err := sqlfile.Load("./examples/create_tables.sql")
-	res, err := s.Exec(db)
-	if err != nil {
+	s := sqlfile.New()
+
+	if err := s.File("./examples/create_tables.sql"); err != nil {
 		return
 	}
+	res, err := s.Exec(db)
 	fmt.Println("Tables are created.")
 
-	s, err = sqlfile.Load("./examples/insert.sql")
-	fmt.Println("Load / s: ", s)
-	fmt.Println("Load / err: ", err)
-	if err != nil {
+	s = sqlfile.New()
+	if err = s.File("./examples/insert.sql"); err != nil {
 		return
 	}
+	fmt.Println("Load / s: ", s)
+	fmt.Println("Load / err: ", err)
 
 	res, err = s.Exec(db)
 	fmt.Println("Exec / err: ", err)

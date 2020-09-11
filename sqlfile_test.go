@@ -82,7 +82,7 @@ func TestExec_Rollback(t *testing.T) {
 	}
 }
 
-func TestLoad_SqlNotIncludeComments(t *testing.T) {
+func TestFile_SqlNotIncludeComments(t *testing.T) {
 	t.Helper()
 
 	exps, err := readFileByLine("./testdata/expected.sql")
@@ -90,8 +90,8 @@ func TestLoad_SqlNotIncludeComments(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	s, err := Load("./testdata/not_include_comments.sql")
-	if err != nil {
+	s := New()
+	if err := s.File("./testdata/not_include_comments.sql"); err != nil {
 		t.Fatalf(err.Error())
 	}
 
@@ -102,7 +102,7 @@ func TestLoad_SqlNotIncludeComments(t *testing.T) {
 	}
 }
 
-func TestLoad_SqlIncludeComments(t *testing.T) {
+func TestFile_SqlIncludeComments(t *testing.T) {
 	t.Helper()
 
 	exps, err := readFileByLine("./testdata/expected.sql")
@@ -110,8 +110,8 @@ func TestLoad_SqlIncludeComments(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	s, err := Load("./testdata/include_comments.sql")
-	if err != nil {
+	s := New()
+	if err := s.File("./testdata/include_comments.sql"); err != nil {
 		t.Fatalf(err.Error())
 	}
 
@@ -120,4 +120,63 @@ func TestLoad_SqlIncludeComments(t *testing.T) {
 	for i := 0; i < len(exps); i++ {
 		assert.Equal(t, exps[i], s.queries[i])
 	}
+}
+
+func TestFile_NotFound(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.File("./testdata/non_exisiting.sql")
+
+	assert.NotEqual(t, nil, err)
+}
+
+func TestFiles_Success(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Files(
+		"./testdata/include_comments.sql",
+		"./testdata/not_include_comments.sql",
+	)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, 2, len(s.files))
+}
+
+func TestFiles_NotFound(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Files(
+		"./testdata/non_exisiting.sql",
+		"./testdata/non_exisiting.sql",
+	)
+
+	assert.NotEqual(t, nil, err)
+}
+
+func TestDirectory_Success(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Directory("./testdata")
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	assert.Equal(t, 3, len(s.files))
+}
+
+func TestDirectory_NotFound(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Directory(
+		"./non_exisiting",
+	)
+
+	assert.NotEqual(t, nil, err)
 }
