@@ -146,6 +146,18 @@ func TestFiles_Success(t *testing.T) {
 	assert.Equal(t, 2, len(s.files))
 }
 
+func TestFiles_NotFound(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Files(
+		"./testdata/non_exisiting.sql",
+		"./testdata/non_exisiting.sql",
+	)
+
+	assert.NotEqual(t, nil, err)
+}
+
 func TestDirectory_Success(t *testing.T) {
 	t.Helper()
 
@@ -156,4 +168,15 @@ func TestDirectory_Success(t *testing.T) {
 	}
 
 	assert.Equal(t, 3, len(s.files))
+}
+
+func TestDirectory_NotFound(t *testing.T) {
+	t.Helper()
+
+	s := New()
+	err := s.Directory(
+		"./non_exisiting",
+	)
+
+	assert.NotEqual(t, nil, err)
 }
