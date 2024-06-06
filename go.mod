@@ -1,4 +1,4 @@
-module github.com/eparisot/sqlfile
+module github.com/tanimutomo/sqlfile
 
 go 1.13
 
