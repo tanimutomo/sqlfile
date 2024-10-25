@@ -102,7 +102,7 @@ func load(path string) (qs []string, err error) {
 		ncls = append(ncls, ncl)
 	}
 
-	l := strings.Join(ncls, " ")
+	l := strings.Join(ncls, "")
 	qs = strings.Split(l, ";")
 	qs = qs[:len(qs)-1]
 
